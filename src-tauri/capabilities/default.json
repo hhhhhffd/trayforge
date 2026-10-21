@@ -1,0 +1,23 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Permissions of the main window: UI events, app version, window dragging, file dialogs and opening the project page. Everything else goes through app commands.",
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:event:default",
+    "core:app:allow-version",
+    "core:window:allow-start-dragging",
+    "dialog:allow-open",
+    "dialog:allow-save",
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [
+        {
+          "url": "https://github.com/hhhhhffd/*"
+        }
+      ]
+    }
+  ]
+}

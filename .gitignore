@@ -1,0 +1,9 @@
+/target
+node_modules/
+/ui/dist
+/src-tauri/target
+/src-tauri/gen/schemas
+/ui/public/dev-tools.json
+/.claude/worktrees
+/.playwright-mcp
+/.serena

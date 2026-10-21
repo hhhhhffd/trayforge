@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trayforge - 64 offline developer tools in your Windows tray</title>
+<meta name="description" content="Trayforge is a free, open-source Windows tray app with 64 offline developer tools. Press Ctrl+Alt+D, get the tool, close it. About 13 MB of RAM while idle, no telemetry.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0b0a1a">
+<link rel="canonical" href="https://hhhhhffd.github.io/trayforge/">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Trayforge - 64 offline developer tools in your Windows tray">
+<meta property="og:description" content="Free, open source, offline. Press Ctrl+Alt+D and get to encoders, hashers, formatters and more. 12.7 MB idle.">
+<meta property="og:url" content="https://hhhhhffd.github.io/trayforge/">
+<meta property="og:image" content="https://hhhhhffd.github.io/trayforge/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Trayforge - 64 offline developer tools in your Windows tray">
+<meta name="twitter:description" content="Free, open source, offline. Press Ctrl+Alt+D. 12.7 MB idle.">
+<meta name="twitter:image" content="https://hhhhhffd.github.io/trayforge/assets/og.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="nav">
+  <a class="brand" href="#top" aria-label="Trayforge home"><img src="assets/icon.svg" alt="" width="28" height="28"><span>Trayforge</span></a>
+  <nav aria-label="Primary">
+    <a href="#features">Features</a><a href="#tools">Tools</a><a href="#light">Footprint</a><a href="#install">Install</a><a href="#faq">FAQ</a>
+    <a class="pill" href="https://github.com/hhhhhffd/trayforge">GitHub</a>
+  </nav>
+</header>
+
+<main id="main">
+<section class="hero" id="top">
+  <div class="aurora" aria-hidden="true"></div>
+  <p class="eyebrow">Free and open source for Windows 10 / 11</p>
+  <h1>64 developer tools,<br><em>one hotkey</em> from your tray.</h1>
+  <p class="lede">Base64, hashes, JSON, regex, JWT, color pickers and more. Press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>D</kbd>, do the thing, close the window. Everything runs offline, and nothing is left running afterward but a 12.7&nbsp;MB tray process.</p>
+  <div class="cta">
+    <a class="btn primary" href="https://github.com/hhhhhffd/trayforge/releases/latest">Download for Windows</a>
+    <a class="btn ghost" href="https://github.com/hhhhhffd/trayforge">View on GitHub</a>
+  </div>
+  <p class="fine">Installer (.exe), MSI, or portable .exe. MIT licensed.</p>
+  <figure class="frame hero-shot">
+    <div class="chrome" aria-hidden="true"><i></i><i></i><i></i></div>
+    <img src="assets/screenshot-dashboard.png" width="1100" height="900" alt="Trayforge dashboard showing tool categories and recently used tools in a translucent window">
+  </figure>
+</section>
+
+<section class="section" id="features" aria-labelledby="h-features">
+  <h2 id="h-features">Built to get out of your way</h2>
+  <div class="grid features">
+    <article class="card wide">
+      <h3>Instant, from anywhere</h3>
+      <p>The global hotkey <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>D</kbd> opens Trayforge over whatever you are doing. No browser tab to find, no site to trust with your tokens.</p>
+    </article>
+    <article class="card">
+      <h3>64 tools</h3>
+      <p>Encoding, hashing, formats, web dev, text, dev utilities and graphics, in seven categories.</p>
+    </article>
+    <article class="card">
+      <h3>Offline and private</h3>
+      <p>All work happens on your machine in a Rust core. No telemetry, no accounts, no network calls for your data.</p>
+    </article>
+    <article class="card stat">
+      <p class="big">12.7 <small>MB</small></p>
+      <h3>Idle in the tray</h3>
+      <p>Closing the window destroys the UI and its WebView, so memory goes back down.</p>
+    </article>
+    <article class="card wide">
+      <h3>Keyboard first</h3>
+      <ul class="keys">
+        <li><span><kbd>Ctrl</kbd>+<kbd>K</kbd></span> Search every tool</li>
+        <li><span><kbd>Ctrl</kbd>+<kbd>P</kbd></span> Quick-switch between tools</li>
+        <li><span><kbd>Ctrl</kbd>+<kbd>Enter</kbd></span> Run the current tool</li>
+      </ul>
+    </article>
+  </div>
+</section>
+
+<section class="section" id="tools" aria-labelledby="h-tools">
+  <h2 id="h-tools">Every tool, by category</h2>
+  <p class="sub">64 tools across seven categories. Tap a category to collapse it.</p>
+  <div class="catalog">
+<details class="cat" open><summary><h3>Encoding</h3><span class="count">8</span></summary><ul><li><b>Base64</b><span>Encode and decode Base64 strings</span></li><li><b>URL Encode / Decode</b><span>Encode and decode URL percent-encoding</span></li><li><b>HTML Entity</b><span>Encode and decode HTML entities</span></li><li><b>JWT Decoder</b><span>Decode and inspect JSON Web Tokens</span></li><li><b>Unicode Escape</b><span>Encode and decode Unicode escape sequences</span></li><li><b>Text to Binary/Hex/Octal/Decimal</b><span>Encode text as binary, hexadecimal, octal, or decimal bytes</span></li><li><b>Morse Code</b><span>Convert text to and from Morse code</span></li><li><b>Caesar Cipher</b><span>Apply a Caesar cipher with any rotation (ROT13 by default)</span></li></ul></details>
+<details class="cat" open><summary><h3>Hashing</h3><span class="count">8</span></summary><ul><li><b>Hash Generator</b><span>Generate MD5, SHA-1, SHA-256, and other hashes</span></li><li><b>HMAC Generator</b><span>Generate HMAC signatures for message authentication</span></li><li><b>Password Hash</b><span>Generate secure password hashes with PBKDF2</span></li><li><b>Checksum</b><span>Calculate CRC32, CRC16, and Adler-32 checksums</span></li><li><b>UUID Generator</b><span>Generate UUIDs in various formats</span></li><li><b>ULID Generator</b><span>Generate time-sortable unique identifiers (ULID)</span></li><li><b>Random String</b><span>Generate secure random strings, passwords, and API keys</span></li><li><b>Nanoid</b><span>Generate compact, URL-safe unique identifiers</span></li></ul></details>
+<details class="cat" open><summary><h3>Formats</h3><span class="count">11</span></summary><ul><li><b>JSON Formatter</b><span>Format, validate, and minify JSON with syntax highlighting</span></li><li><b>JSON Path Query</b><span>Query JSON data using JSONPath expressions</span></li><li><b>JSON ↔ YAML</b><span>Convert between JSON and YAML formats</span></li><li><b>YAML Formatter</b><span>Format, validate, and beautify YAML documents</span></li><li><b>XML Formatter</b><span>Format, validate, and beautify XML documents</span></li><li><b>XML ↔ JSON</b><span>Convert between XML and JSON formats</span></li><li><b>CSV → JSON</b><span>Convert CSV data to JSON format</span></li><li><b>JSON → CSV</b><span>Convert JSON arrays to CSV format</span></li><li><b>SQL Formatter</b><span>Format and beautify SQL queries</span></li><li><b>GraphQL Formatter</b><span>Format and beautify GraphQL queries and mutations</span></li><li><b>TOML Parser</b><span>Parse, validate, and format TOML files</span></li></ul></details>
+<details class="cat" open><summary><h3>Web Dev</h3><span class="count">9</span></summary><ul><li><b>Color Converter</b><span>Convert colors between HEX, RGB, HSL, and HSV formats</span></li><li><b>CSS Minifier</b><span>Minify or beautify CSS code</span></li><li><b>JS Minifier</b><span>Minify or beautify JavaScript code</span></li><li><b>HTML Minifier</b><span>Minify or beautify HTML code</span></li><li><b>Markdown Preview</b><span>Preview Markdown and convert to HTML</span></li><li><b>Lorem Ipsum</b><span>Generate placeholder text for designs</span></li><li><b>Data URI</b><span>Convert text or data to Data URI format</span></li><li><b>SVG Path Analyzer</b><span>Parse and analyze SVG path commands</span></li><li><b>Placeholder Image</b><span>Generate placeholder images as data URIs</span></li></ul></details>
+<details class="cat" open><summary><h3>Text</h3><span class="count">12</span></summary><ul><li><b>String Case</b><span>Convert text between camelCase, snake_case, kebab-case, and more</span></li><li><b>Regex Tester</b><span>Test and debug regular expressions with match highlighting</span></li><li><b>Regex Library</b><span>Browse and copy common regex patterns</span></li><li><b>String Diff</b><span>Compare two strings and show differences</span></li><li><b>Line Sorter</b><span>Sort, shuffle, dedupe, and manipulate text lines</span></li><li><b>Text Statistics</b><span>Analyze text for word count, character frequency, and readability</span></li><li><b>String Escape</b><span>Escape and unescape strings for various languages</span></li><li><b>Whitespace Tool</b><span>Remove, normalize, or format whitespace in text</span></li><li><b>Base Converter</b><span>Convert numbers between binary, octal, decimal, and hexadecimal</span></li><li><b>Unix Timestamp</b><span>Convert between Unix timestamps and human-readable dates</span></li><li><b>Epoch Batch Converter</b><span>Convert multiple timestamps or dates in batch</span></li><li><b>Slug Generator</b><span>Generate URL-friendly slugs from text</span></li></ul></details>
+<details class="cat" open><summary><h3>Dev Utils</h3><span class="count">12</span></summary><ul><li><b>QR Code</b><span>Generate QR codes from text, URLs, or data</span></li><li><b>Cron Parser</b><span>Parse cron expressions and show next execution times</span></li><li><b>Git Branch Name</b><span>Generate standardized git branch names from descriptions</span></li><li><b>Semver Comparator</b><span>Parse, compare, and bump semantic versions</span></li><li><b>ASCII Art</b><span>Generate ASCII art text banners</span></li><li><b>HTTP Status</b><span>Look up HTTP status codes and their meanings</span></li><li><b>MIME Type</b><span>Look up MIME types and file extensions</span></li><li><b>Port Lookup</b><span>Look up common port numbers and their services</span></li><li><b>IP Address</b><span>Validate, convert, and analyze IP addresses and subnets</span></li><li><b>Certificate Decoder</b><span>Parse and display X.509 certificate information</span></li><li><b>HTTP Client</b><span>Build and send HTTP requests with full header and body control</span></li><li><b>TOTP Generator</b><span>Generate live TOTP codes from a secret or QR code, for testing 2FA integrations</span></li></ul></details>
+<details class="cat" open><summary><h3>Graphics</h3><span class="count">4</span></summary><ul><li><b>Tailwind Colors</b><span>Browse the complete Tailwind CSS v3 color palette</span></li><li><b>Color Palettes</b><span>Browse and copy curated color palettes</span></li><li><b>SVG Editor</b><span>Edit SVG markup with a live preview</span></li><li><b>Screen Color Picker</b><span>Pick any color from anywhere on your screen</span></li></ul></details>
+
+  </div>
+</section>
+
+<section class="section" id="shots" aria-labelledby="h-shots">
+  <h2 id="h-shots">A translucent window that gets out of the way</h2>
+  <p class="sub">Acrylic or Mica, themeable accent, resizable, and it remembers its size.</p>
+  <div class="gallery">
+    <figure class="frame"><img loading="lazy" src="assets/screenshot-tool.png" width="1100" height="900" alt="A tool open with an input pane, an output pane and a Run button"><figcaption>Input, options and output side by side.</figcaption></figure>
+    <figure class="frame"><img loading="lazy" src="assets/screenshot-settings.png" width="1100" height="900" alt="Settings page with theme, accent color, window effect and recent-tools options"><figcaption>Theme, accent, glass effect and recent-tools limit.</figcaption></figure>
+  </div>
+</section>
+
+<section class="section" id="light" aria-labelledby="h-light">
+  <h2 id="h-light">How it stays light</h2>
+  <p class="sub">The window is a guest, not a resident.</p>
+  <ol class="flow">
+    <li><span class="tag">Always</span><h3>Tray-only Rust process</h3><p>Just the tray icon, the hotkey listener and the tool core. About 12.7&nbsp;MB.</p></li>
+    <li><span class="tag">On demand</span><h3>Window created</h3><p>Hotkey or tray click builds the Tauri window and WebView with the React UI.</p></li>
+    <li><span class="tag">On close</span><h3>Window destroyed</h3><p>Closing tears down the window and its WebView, returning memory to the system.</p></li>
+  </ol>
+</section>
+
+<section class="section" id="install" aria-labelledby="h-install">
+  <h2 id="h-install">Install</h2>
+  <div class="two">
+    <div>
+      <ol class="steps">
+        <li>Open the <a href="https://github.com/hhhhhffd/trayforge/releases/latest">latest release</a>.</li>
+        <li>Download the installer (NSIS .exe), the MSI, or the portable .exe.</li>
+        <li>Run it. If SmartScreen appears, choose <b>More info</b>, then <b>Run anyway</b> (builds are unsigned).</li>
+        <li>Press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>D</kbd> to open Trayforge.</li>
+      </ol>
+      <a class="btn primary" href="https://github.com/hhhhhffd/trayforge/releases/latest">Download for Windows</a>
+    </div>
+    <div>
+      <h3>Build from source</h3>
+      <pre><code>git clone https://github.com/hhhhhffd/trayforge
+cd trayforge
+npm --prefix ui install &amp;&amp; npm --prefix ui run build &amp;&amp; cargo build --release -p trayforge</code></pre>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="faq" aria-labelledby="h-faq">
+  <h2 id="h-faq">Questions</h2>
+  <div class="faq">
+    <details><summary>Why does SmartScreen warn me?</summary><p>Release builds are not code-signed, so Windows shows "Windows protected your PC". Choose <b>More info</b>, then <b>Run anyway</b>. The source is public and you can build it yourself.</p></details>
+    <details><summary>Does it collect any data?</summary><p>No. There is no telemetry and no account. The tools run locally and work without a network connection.</p></details>
+    <details><summary>Which Windows versions work?</summary><p>Windows 10 and 11. The UI uses the Microsoft Edge WebView2 runtime, which is preinstalled on Windows 11 and current Windows 10 installs.</p></details>
+    <details><summary>Why is idle memory so low?</summary><p>The UI window and its WebView exist only while open. Close it and only the small Rust tray process remains, about 12.7&nbsp;MB.</p></details>
+    <details><summary>What is the license?</summary><p>MIT. Use it, change it, ship it.</p></details>
+  </div>
+</section>
+</main>
+
+<footer class="foot">
+  <p>Trayforge is MIT licensed, made by <a href="https://github.com/hhhhhffd">hhhhhffd</a>.</p>
+  <p><a href="https://github.com/hhhhhffd/trayforge">Source on GitHub</a> · <a href="https://github.com/hhhhhffd/trayforge/releases/latest">Releases</a> · <a href="https://github.com/hhhhhffd/trayforge/issues">Issues</a></p>
+</footer>
+<script src="main.js" defer></script>
+</body>
+</html>

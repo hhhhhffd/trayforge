@@ -1,0 +1,36 @@
+[package]
+name = "trayforge"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Trayforge: tray-resident developer utilities"
+
+[features]
+# Embeds frontendDist instead of loading devUrl. On by default so no build can depend on a dev server; `tauri dev` turns it off itself.
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+trayforge-core = { path = "../crates/trayforge-core" }
+tauri = { version = "2", features = ["tray-icon", "image-png"] }
+tauri-plugin-dialog = "2"
+tauri-plugin-opener = "2"
+tauri-plugin-global-shortcut = "2"
+tauri-plugin-single-instance = "2"
+tauri-plugin-autostart = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+base64 = "0.22"
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
+
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.61", features = [
+    "Win32_Foundation",
+    "Win32_Graphics_Gdi",
+    "Win32_System_LibraryLoader",
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_UI_WindowsAndMessaging",
+] }
