@@ -4914,7 +4914,7 @@ dependencies = [
 
 [[package]]
 name = "trayforge"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "base64 0.22.1",
  "reqwest 0.12.28",
@@ -4933,7 +4933,7 @@ dependencies = [
 
 [[package]]
 name = "trayforge-core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "base64 0.22.1",
  "chrono",
