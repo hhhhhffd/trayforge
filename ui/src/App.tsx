@@ -7,7 +7,7 @@ import { Splitter } from "./components/Splitter";
 import { ToolPage } from "./components/ToolPage";
 import { SCREEN_COLOR_PICKER_ID } from "./lib";
 import { emitAction } from "./actions";
-import { flushDrafts } from "./drafts";
+import { flushDrafts, readDraft, writeDraft } from "./drafts";
 import { useSettings } from "./settings";
 import { CATEGORIES, SIDEBAR_WIDTH, type Category, type ToolInfo } from "./types";
 
@@ -24,11 +24,15 @@ export function App({ tools }: { tools: ToolInfo[] }) {
     if ((window as { __TRAYFORGE_INITIAL_ROUTE__?: string }).__TRAYFORGE_INITIAL_ROUTE__ === "settings") {
       return { kind: "settings" };
     }
+    // Reopened while the app keeps running: back where the window was closed.
+    const open = readDraft<View | null>("app:view", null);
+    if (open && (open.kind !== "tool" || toolById.has(open.id))) return open;
     const last = settings.lastTool;
     return !settings.openDashboardOnLaunch && last && toolById.has(last)
       ? { kind: "tool", id: last }
       : { kind: "dashboard" };
   });
+  useEffect(() => writeDraft("app:view", view), [view]);
   const [quickOpen, setQuickOpen] = useState(false);
   const [closing, setClosing] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<Category | null>(null);
