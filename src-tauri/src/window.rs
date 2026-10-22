@@ -205,8 +205,8 @@ fn open(
                 eprintln!("trayforge: cannot emit navigate: {e}");
             }
         }
-        // WebView2 takes a while to start, and focusing the window before the page exists
-        // can leave the keyboard focus outside it. Focus again once the UI is there.
+        // WebView2 takes a while to start, and Windows may refuse the focus requested
+        // before the page exists. Ask again once the UI is there.
         focus(&window);
     });
 
@@ -243,13 +243,11 @@ fn open(
     Ok(())
 }
 
-/// Brings the window to the front and moves the keyboard focus into the page.
+/// Brings the window to the front. Focusing the webview itself is avoided on purpose: it
+/// takes the focus from the window, and the popover would close on that blur.
 fn focus(window: &WebviewWindow) {
     if let Err(e) = window.set_focus() {
         eprintln!("trayforge: cannot focus window: {e}");
-    }
-    if let Err(e) = AsRef::<tauri::Webview>::as_ref(window).set_focus() {
-        eprintln!("trayforge: cannot focus webview: {e}");
     }
 }
 
