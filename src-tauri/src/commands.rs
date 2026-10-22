@@ -296,6 +296,12 @@ pub async fn hide_window(app: AppHandle) {
     }
 }
 
+/// The UI has rendered its first frame.
+#[tauri::command]
+pub fn window_ready(window: tauri::WebviewWindow) {
+    window::reveal(&window);
+}
+
 #[tauri::command]
 pub fn reset_window_state(app: AppHandle) -> Result<(), String> {
     window::reset_popover(&app)

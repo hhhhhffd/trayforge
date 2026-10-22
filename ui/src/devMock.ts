@@ -114,6 +114,7 @@ export async function mockInvoke(cmd: string, args: Record<string, unknown> = {}
       return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#10b981"/></svg>';
     case "write_text_file":
     case "hide_window":
+    case "window_ready":
     case "set_launch_at_login":
     case "reset_window_state":
       return null;

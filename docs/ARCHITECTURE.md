@@ -50,6 +50,7 @@ declared defaults; unknown ids or wrong types are rejected (`InvalidOptions`).
 | `pick_screen_color` | — | `"#RRGGBB"` (also copied to clipboard by the UI) |
 | `read_text_file` / `write_text_file` | `{ path }` / `{ path, contents }` | file text / `null` |
 | `hide_window` | — | destroys the main window |
+| `window_ready` | — | `null`; shows the window, which stays hidden until the UI's first render (or 1.5 s after the page loaded) |
 | `set_launch_at_login` | `{ enabled }` | `null` |
 | `reset_window_state` | — | `null`; forgets the resized popover size and re-places an open popover |
 
@@ -58,7 +59,8 @@ Events from the shell: `navigate` (`"settings"`) and `closing` (the window is de
 
 Panel input (tool input and mode, HTTP request, SVG source, the TOTP form) is a draft: the
 UI sends it to the shell, which keeps it in memory only, so it comes back when the window
-reopens and is gone when the app quits.
+reopens and is gone when the app quits. The open view is a draft too, so a reopened window
+comes back where it was closed; only a fresh app start follows "Open Dashboard on Launch".
 
 The popover opens next to the taskbar at its tray end (edge detected from the
 `Shell_TrayWnd`/`Shell_SecondaryTrayWnd` windows), 12 px from it, at the size it was last

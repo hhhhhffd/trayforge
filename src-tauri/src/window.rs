@@ -38,6 +38,9 @@ const WINDOW_STATE_FILE: &str = "window-state.json";
 pub const POPOVER_STATE_FILE: &str = "popover-state.json";
 /// A tray click that destroyed the popover by stealing focus must not reopen it.
 const REOPEN_GUARD: Duration = Duration::from_millis(400);
+/// The window stays hidden until the UI reports its first render ([`reveal`]); a UI that
+/// never does is shown this long after the page loaded anyway.
+const READY_FALLBACK: Duration = Duration::from_millis(1500);
 
 /// True while the screen color picker overlay owns the focus; the popover must survive it.
 #[derive(Default)]
@@ -205,9 +208,11 @@ fn open(
                 eprintln!("trayforge: cannot emit navigate: {e}");
             }
         }
-        // WebView2 takes a while to start, and Windows may refuse the focus requested
-        // before the page exists. Ask again once the UI is there.
-        focus(&window);
+        let window = window.clone();
+        tauri::async_runtime::spawn_blocking(move || {
+            std::thread::sleep(READY_FALLBACK);
+            reveal(&window);
+        });
     });
 
     let window = builder.build().map_err(|e| e.to_string())?;
@@ -238,9 +243,20 @@ fn open(
         _ => {}
     });
 
-    window.show().map_err(|e| e.to_string())?;
-    focus(&window);
     Ok(())
+}
+
+/// Shows the window created by [`open`] once its UI has rendered, so it never appears as an
+/// empty frame. Does nothing for a window that is already visible or destroyed.
+pub fn reveal(window: &WebviewWindow) {
+    if window.is_visible().unwrap_or(true) {
+        return;
+    }
+    if let Err(e) = window.show() {
+        eprintln!("trayforge: cannot show window: {e}");
+        return;
+    }
+    focus(window);
 }
 
 /// Brings the window to the front. Focusing the webview itself is avoided on purpose: it

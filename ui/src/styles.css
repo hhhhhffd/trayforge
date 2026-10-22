@@ -1817,11 +1817,16 @@ input[type="color"] {
   font-size: 13px;
 }
 
-/* Window open / close: the shell waits CLOSE_ANIMATION (120 ms) before destroying it. */
+/* Window open / close: the shell shows the window when the UI calls window_ready (then
+   `data-shown` is set) and waits CLOSE_ANIMATION (120 ms) before destroying it. */
 .app {
+  opacity: 0;
+}
+:root[data-shown] .app {
+  opacity: 1;
   animation: app-in 180ms cubic-bezier(0.2, 0.9, 0.3, 1.15) both;
 }
-.app.closing {
+:root[data-shown] .app.closing {
   animation: app-out 120ms ease-in both;
   pointer-events: none;
 }

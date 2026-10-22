@@ -27,6 +27,16 @@ function Root() {
       .catch((e) => setError(String(e instanceof Error ? e.message : (e as { display?: string }).display ?? e)));
   }, []);
 
+  const settled = loaded !== null || error !== null;
+  useEffect(() => {
+    if (!settled) return;
+    // `data-shown` starts the open animation, which would otherwise play while hidden.
+    api
+      .windowReady()
+      .catch((e) => console.error("window_ready failed", e))
+      .finally(() => (document.documentElement.dataset.shown = ""));
+  }, [settled]);
+
   if (error) {
     return (
       <div className="app-error" role="alert">

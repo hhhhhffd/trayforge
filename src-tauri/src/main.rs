@@ -59,6 +59,7 @@ fn main() {
             commands::read_text_file,
             commands::write_text_file,
             commands::hide_window,
+            commands::window_ready,
             commands::set_launch_at_login,
             commands::reset_window_state,
         ])

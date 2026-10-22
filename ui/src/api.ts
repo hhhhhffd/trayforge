@@ -70,6 +70,8 @@ export const api = {
   writeTextFile: (path: string, contents: string) =>
     call<null>("write_text_file", { path, contents }),
   hideWindow: () => call<null>("hide_window"),
+  /** Shows the window, which the shell keeps hidden until the UI has rendered. */
+  windowReady: () => call<null>("window_ready"),
   setLaunchAtLogin: (enabled: boolean) => call<null>("set_launch_at_login", { enabled }),
 
   /** Native open dialog; returns the chosen path or null. Mocked in the browser. */
