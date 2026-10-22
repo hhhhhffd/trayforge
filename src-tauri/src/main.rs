@@ -6,6 +6,7 @@ mod hotkey;
 mod picker;
 mod settings;
 mod taskbar;
+mod totp_store;
 mod window;
 
 use tauri::{
@@ -40,6 +41,7 @@ fn main() {
         .manage(hotkey::CurrentHotkey::default())
         .manage(window::PickerActive::default())
         .manage(window::LastBlurClose::default())
+        .manage(commands::Drafts::default())
         .invoke_handler(tauri::generate_handler![
             commands::list_tools,
             commands::process_tool,
@@ -47,6 +49,10 @@ fn main() {
             commands::save_settings,
             commands::totp_generate,
             commands::totp_parse_uri,
+            commands::totp_load_accounts,
+            commands::totp_save_accounts,
+            commands::get_drafts,
+            commands::set_draft,
             commands::decode_qr_image,
             commands::http_request,
             commands::pick_screen_color,

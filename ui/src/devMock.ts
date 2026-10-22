@@ -3,6 +3,13 @@
 import type { ToolInfo } from "./types";
 
 const SETTINGS_KEY = "trayforge-dev-settings";
+const TOTP_ACCOUNTS_KEY = "trayforge-dev-totp-accounts";
+const DRAFTS_KEY = "trayforge-dev-drafts";
+
+// Accounts persist like the encrypted file; drafts last for the tab like the tray process.
+function readJson(storage: Storage, key: string, fallback: unknown): unknown {
+  return JSON.parse(storage.getItem(key) ?? JSON.stringify(fallback));
+}
 
 const extraTools: ToolInfo[] = [
   ["http-client", "HTTP Client", "globe", "Build and send HTTP requests with full header and body control"],
@@ -85,6 +92,20 @@ export async function mockInvoke(cmd: string, args: Record<string, unknown> = {}
     }
     case "totp_parse_uri":
       return { account: "alice@example.com", issuer: "Example", secret: "JBSWY3DPEHPK3PXP", algorithm: "SHA1", digits: 6, period: 30 };
+    case "totp_load_accounts":
+      return readJson(localStorage, TOTP_ACCOUNTS_KEY, []);
+    case "totp_save_accounts":
+      localStorage.setItem(TOTP_ACCOUNTS_KEY, JSON.stringify(args.accounts));
+      return null;
+    case "get_drafts":
+      return readJson(sessionStorage, DRAFTS_KEY, {});
+    case "set_draft": {
+      const drafts = readJson(sessionStorage, DRAFTS_KEY, {}) as Record<string, unknown>;
+      if (args.value === null) delete drafts[String(args.key)];
+      else drafts[String(args.key)] = args.value;
+      sessionStorage.setItem(DRAFTS_KEY, JSON.stringify(drafts));
+      return null;
+    }
     case "decode_qr_image":
       return "otpauth://totp/Example:alice@example.com?secret=JBSWY3DPEHPK3PXP&issuer=Example";
     case "pick_screen_color":

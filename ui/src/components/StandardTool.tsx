@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type MutableRefObjec
 import { AlertTriangle, ArrowUpDown, Check, ClipboardPaste, Copy, Play, TextCursorInput, Trash2, XCircle, AlignLeft } from "lucide-react";
 import { onAction } from "../actions";
 import { api, copyText, toToolFailure } from "../api";
+import { readDraft, writeDraft } from "../drafts";
 import { countChars } from "../lib";
 import { useSettings } from "../settings";
 import { useToast } from "../toast";
@@ -24,17 +25,35 @@ function outputAsText(out: ToolOutput | null): string {
     .join("\n");
 }
 
-export function StandardTool({ tool, carriedInput }: { tool: ToolInfo; carriedInput: MutableRefObject<string> }) {
+interface Draft {
+  input: string;
+  reversed: boolean;
+  ran: boolean;
+}
+
+export function StandardTool({
+  tool,
+  carriedInput,
+}: {
+  tool: ToolInfo;
+  carriedInput: MutableRefObject<string | null>;
+}) {
   const { settings, update } = useSettings();
   const toast = useToast();
-  const [input, setInput] = useState(settings.preserveInput ? carriedInput.current : "");
+  const draftKey = `tool:${tool.id}`;
+  const [draft] = useState(() => readDraft<Draft>(draftKey, { input: "", reversed: false, ran: false }));
+  const [input, setInput] = useState(() =>
+    settings.preserveInput && carriedInput.current !== null ? carriedInput.current : draft.input,
+  );
   const [output, setOutput] = useState<ToolOutput | null>(null);
   const [error, setError] = useState<ToolFailure | null>(null);
-  const [reversed, setReversed] = useState(false);
+  const [reversed, setReversed] = useState(draft.reversed);
   const [copied, setCopied] = useState<string | null>(null);
   const stdRef = useRef<HTMLDivElement>(null);
   const mainRef = useRef<HTMLDivElement>(null);
   const hasRun = useRef(false);
+  // The output is not kept in the draft; a restored draft that was run is run again.
+  const rerunDraft = useRef(draft.ran && input === draft.input);
   const seq = useRef(0);
 
   const options = useMemo(
@@ -96,6 +115,18 @@ export function StandardTool({ tool, carriedInput }: { tool: ToolInfo; carriedIn
     setError(null);
     setReversed((r) => !r);
   }, [tool.secondaryAction, output]);
+
+  useEffect(() => {
+    if (!rerunDraft.current) return;
+    rerunDraft.current = false;
+    void run();
+  }, [run]);
+
+  // `output` and `error` are listed so the draft records `hasRun` once a run finishes.
+  useEffect(
+    () => writeDraft(draftKey, { input, reversed, ran: hasRun.current } satisfies Draft),
+    [draftKey, input, reversed, output, error],
+  );
 
   // Shortcuts forwarded from App; the handler is re-subscribed when its inputs change.
   useEffect(

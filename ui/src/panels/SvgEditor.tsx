@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Code2, Copy, Download, Eye, FolderOpen } from "lucide-react";
 import { api, copyText } from "../api";
+import { useDraft } from "../drafts";
 import { useToast } from "../toast";
 
 const EXAMPLE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
@@ -21,7 +22,7 @@ const EXAMPLE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 20
 const SVG_FILTER = [{ name: "SVG", extensions: ["svg"] }];
 
 export default function SvgEditor() {
-  const [source, setSource] = useState(EXAMPLE_SVG);
+  const [source, setSource] = useDraft("svg:source", EXAMPLE_SVG);
   const [broken, setBroken] = useState(false);
   const toast = useToast();
 

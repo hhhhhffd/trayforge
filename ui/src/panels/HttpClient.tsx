@@ -1,6 +1,7 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Copy, Globe, Plus, Send, X } from "lucide-react";
 import { api, copyText, toToolFailure } from "../api";
+import { readDraft, useDraft, writeDraft } from "../drafts";
 import { useToast } from "../toast";
 import type { HttpResponse } from "../types";
 
@@ -17,6 +18,13 @@ interface Row {
 
 let nextRowId = 1;
 const newRow = (key = "", value = ""): Row => ({ id: nextRowId++, key, value, enabled: true });
+
+/** Rows restored from a draft keep their ids, so new rows must not reuse them. */
+function draftRows(key: string, fallback: () => Row[]): Row[] {
+  const rows = readDraft<Row[] | null>(key, null) ?? fallback();
+  nextRowId = Math.max(nextRowId, ...rows.map((r) => r.id + 1));
+  return rows;
+}
 
 function RowsEditor({
   rows,
@@ -61,19 +69,24 @@ function prettyBody(res: HttpResponse): string {
 
 export default function HttpClient() {
   const toast = useToast();
-  const [method, setMethod] = useState("GET");
-  const [url, setUrl] = useState("https://httpbin.org/get");
+  const [method, setMethod] = useDraft("http:method", "GET");
+  const [url, setUrl] = useDraft("http:url", "https://httpbin.org/get");
   const [reqTab, setReqTab] = useState<"Headers" | "Body">("Body");
-  const [headers, setHeaders] = useState<Row[]>(() => [newRow("Accept", "*/*"), newRow("User-Agent", "Trayforge")]);
-  const [format, setFormat] = useState<BodyFormat>("None");
-  const [text, setText] = useState("");
-  const [form, setForm] = useState<Row[]>(() => [newRow()]);
+  const [headers, setHeaders] = useState<Row[]>(() =>
+    draftRows("http:headers", () => [newRow("Accept", "*/*"), newRow("User-Agent", "Trayforge")]),
+  );
+  const [format, setFormat] = useDraft<BodyFormat>("http:format", "None");
+  const [text, setText] = useDraft("http:body", "");
+  const [form, setForm] = useState<Row[]>(() => draftRows("http:form", () => [newRow()]));
   const [resTab, setResTab] = useState<"Body" | "Headers" | "Info">("Body");
   const [busy, setBusy] = useState(false);
   const [response, setResponse] = useState<{ res: HttpResponse; url: string; method: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [split, setSplit] = useState(55);
   const root = useRef<HTMLDivElement>(null);
+
+  useEffect(() => writeDraft("http:headers", headers), [headers]);
+  useEffect(() => writeDraft("http:form", form), [form]);
 
   const send = async () => {
     let target = url.trim();

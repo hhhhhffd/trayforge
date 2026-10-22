@@ -2,7 +2,7 @@
 
 use std::{
     fs,
-    sync::atomic::Ordering,
+    sync::{atomic::Ordering, Mutex},
     time::{Duration, Instant},
 };
 
@@ -19,6 +19,7 @@ use trayforge_core::{
 use crate::{
     hotkey, picker,
     settings::{self, Settings},
+    totp_store,
     window::{self, PickerActive},
 };
 
@@ -103,6 +104,38 @@ pub fn totp_generate(
 #[tauri::command]
 pub fn totp_parse_uri(uri: String) -> Result<TotpParams, ToolFailure> {
     Ok(totp::parse_uri(&uri)?)
+}
+
+#[tauri::command]
+pub fn totp_load_accounts(app: AppHandle) -> Result<Vec<TotpParams>, String> {
+    totp_store::load(&app)
+}
+
+#[tauri::command]
+pub fn totp_save_accounts(app: AppHandle, accounts: Vec<TotpParams>) -> Result<(), String> {
+    totp_store::save(&app, &accounts)
+}
+
+/// Unsaved panel input, kept by the tray process while the window is destroyed. Never
+/// written to disk: it may hold secrets and is gone when the app quits.
+#[derive(Default)]
+pub struct Drafts(Mutex<Map<String, Value>>);
+
+#[tauri::command]
+pub fn get_drafts(drafts: tauri::State<Drafts>) -> Result<Map<String, Value>, String> {
+    Ok(drafts.0.lock().map_err(|e| e.to_string())?.clone())
+}
+
+/// `null` forgets the draft.
+#[tauri::command]
+pub fn set_draft(drafts: tauri::State<Drafts>, key: String, value: Value) -> Result<(), String> {
+    let mut drafts = drafts.0.lock().map_err(|e| e.to_string())?;
+    if value.is_null() {
+        drafts.remove(&key);
+    } else {
+        drafts.insert(key, value);
+    }
+    Ok(())
 }
 
 #[tauri::command]

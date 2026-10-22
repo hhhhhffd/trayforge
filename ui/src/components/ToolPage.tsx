@@ -9,7 +9,7 @@ interface Props {
   tool: ToolInfo;
   isFavorite: boolean;
   onToggleFavorite: () => void;
-  carriedInput: MutableRefObject<string>;
+  carriedInput: MutableRefObject<string | null>;
 }
 
 export function ToolPage({ tool, isFavorite, onToggleFavorite, carriedInput }: Props) {

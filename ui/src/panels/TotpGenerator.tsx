@@ -1,12 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { Eye, EyeOff, FolderOpen, ClipboardPaste, QrCode, UserRound } from "lucide-react";
+import { Eye, EyeOff, FolderOpen, ClipboardPaste, KeyRound, Plus, QrCode, Trash2, UserRound } from "lucide-react";
 import { api, copyText, toToolFailure } from "../api";
+import { ConfirmDialog } from "../components/ConfirmDialog";
+import { useDraft } from "../drafts";
 import { useToast } from "../toast";
-import type { TotpAlgorithm, TotpCode } from "../types";
+import type { TotpAlgorithm, TotpCode, TotpUri } from "../types";
 
 const ALGORITHMS: TotpAlgorithm[] = ["SHA1", "SHA256", "SHA512"];
 const RING_RADIUS = 20;
 const RING_LENGTH = 2 * Math.PI * RING_RADIUS;
+
+type CodeResult = { code: TotpCode; error: null } | { code: null; error: string };
 
 function blobToBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -17,42 +21,33 @@ function blobToBase64(blob: Blob): Promise<string> {
   });
 }
 
-export default function TotpGenerator() {
-  const toast = useToast();
-  const [account, setAccount] = useState("");
-  const [issuer, setIssuer] = useState("");
-  const [secret, setSecret] = useState("");
-  const [reveal, setReveal] = useState(false);
-  const [algorithm, setAlgorithm] = useState<TotpAlgorithm>("SHA1");
-  const [digits, setDigits] = useState(6);
-  const [period, setPeriod] = useState(30);
-  const [code, setCode] = useState<TotpCode | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [qrError, setQrError] = useState<string | null>(null);
-  const [dragging, setDragging] = useState(false);
-  const fileInput = useRef<HTMLInputElement>(null);
+const cleanSecret = (secret: string) => secret.replace(/[\s-]/g, "");
 
-  // The only recurring timer in the app: ticks once per second while the panel is
-  // mounted and the document is visible; stops when either stops being true.
+const groupCode = (code: string) => code.replace(/(.{3})(?=.)/g, "$1 ");
+
+/** Live codes for `entries`, in the same order. */
+function useTotpCodes(entries: Pick<TotpUri, "secret" | "algorithm" | "digits" | "period">[]): (CodeResult | undefined)[] {
+  // Entries are compared by value, so re-renders do not restart the timer.
+  const key = JSON.stringify(entries.map((e) => [e.secret, e.algorithm, e.digits, e.period]));
+  const [state, setState] = useState<{ key: string; results: CodeResult[] }>({ key: "[]", results: [] });
+
+  // The app's only recurring timers: tick once per second while the panel is mounted and
+  // the document is visible; stop when either stops being true.
   useEffect(() => {
-    const cleanSecret = secret.replace(/[\s-]/g, "");
-    if (!cleanSecret) {
-      setCode(null);
-      setError(null);
-      return;
-    }
+    const list = JSON.parse(key) as [string, TotpAlgorithm, number, number][];
+    if (list.length === 0) return;
     let cancelled = false;
     const tick = async () => {
-      try {
-        const next = await api.totpGenerate({ secret: cleanSecret, algorithm, digits, period });
-        if (cancelled) return;
-        setCode(next);
-        setError(null);
-      } catch (e) {
-        if (cancelled) return;
-        setCode(null);
-        setError(toToolFailure(e).display);
-      }
+      const results = await Promise.all(
+        list.map(async ([secret, algorithm, digits, period]): Promise<CodeResult> => {
+          try {
+            return { code: await api.totpGenerate({ secret, algorithm, digits, period }), error: null };
+          } catch (e) {
+            return { code: null, error: toToolFailure(e).display };
+          }
+        }),
+      );
+      if (!cancelled) setState({ key, results });
     };
     let timer: number | undefined;
     const stop = () => {
@@ -72,7 +67,65 @@ export default function TotpGenerator() {
       stop();
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [secret, algorithm, digits, period]);
+  }, [key]);
+
+  // Results of the previous entries must not be shown next to the new ones.
+  return state.key === key ? state.results : [];
+}
+
+function Ring({ remaining, period, size }: { remaining: number; period: number; size: number }) {
+  return (
+    <span className="ring" aria-label={`${remaining} seconds remaining`}>
+      <svg viewBox="0 0 48 48" width={size} height={size} aria-hidden="true">
+        <circle cx="24" cy="24" r={RING_RADIUS} className="ring-bg" />
+        <circle
+          cx="24"
+          cy="24"
+          r={RING_RADIUS}
+          className={`ring-fg${remaining <= 5 ? " low" : ""}`}
+          strokeDasharray={RING_LENGTH}
+          strokeDashoffset={RING_LENGTH * (1 - remaining / period)}
+          transform="rotate(-90 24 24)"
+        />
+      </svg>
+      <span className="ring-text">{remaining}</span>
+    </span>
+  );
+}
+
+export default function TotpGenerator() {
+  const toast = useToast();
+  // The form is a draft, so an account being typed in survives the popover closing.
+  const [account, setAccount] = useDraft("totp:account", "");
+  const [issuer, setIssuer] = useDraft("totp:issuer", "");
+  const [secret, setSecret] = useDraft("totp:secret", "");
+  const [algorithm, setAlgorithm] = useDraft<TotpAlgorithm>("totp:algorithm", "SHA1");
+  const [digits, setDigits] = useDraft("totp:digits", 6);
+  const [period, setPeriod] = useDraft("totp:period", 30);
+  const [reveal, setReveal] = useState(false);
+  const [accounts, setAccounts] = useState<TotpUri[] | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [removing, setRemoving] = useState<number | null>(null);
+  const [qrError, setQrError] = useState<string | null>(null);
+  const [dragging, setDragging] = useState(false);
+  const fileInput = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .totpLoadAccounts()
+      .then((list) => !cancelled && setAccounts(list))
+      .catch((e) => !cancelled && setLoadError(toToolFailure(e).display));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const saved = accounts ?? [];
+  const draftSecret = cleanSecret(secret);
+  const codes = useTotpCodes(saved);
+  // Separate from the saved codes, so typing the secret does not reset their timer.
+  const [preview] = useTotpCodes(draftSecret ? [{ secret: draftSecret, algorithm, digits, period }] : []);
 
   const importImage = async (blob: Blob) => {
     setQrError(null);
@@ -105,7 +158,7 @@ export default function TotpGenerator() {
     }
   };
 
-  const copyCode = async () => {
+  const copyCode = async (code: TotpCode | null | undefined) => {
     if (!code) return;
     try {
       await copyText(code.code);
@@ -115,14 +168,92 @@ export default function TotpGenerator() {
     }
   };
 
+  const store = async (next: TotpUri[]): Promise<boolean> => {
+    try {
+      await api.totpSaveAccounts(next);
+      setAccounts(next);
+      return true;
+    } catch (e) {
+      toast(`Could not save accounts: ${toToolFailure(e).display}`);
+      return false;
+    }
+  };
+
+  const saveAccount = async () => {
+    // Without the stored list, saving would overwrite the accounts that failed to load.
+    if (!accounts || !preview?.code) return;
+    const entry: TotpUri = { account: account.trim(), issuer: issuer.trim(), secret: draftSecret, algorithm, digits, period };
+    if (!(await store([...accounts, entry]))) return;
+    setAccount("");
+    setIssuer("");
+    setSecret("");
+    setAlgorithm("SHA1");
+    setDigits(6);
+    setPeriod(30);
+    setReveal(false);
+    toast("Account saved");
+  };
+
+  const removeAccount = async (index: number) => {
+    setRemoving(null);
+    if (accounts) await store(accounts.filter((_, i) => i !== index));
+  };
+
   const setPeriodClamped = (n: number) => {
     if (Number.isFinite(n)) setPeriod(Math.min(300, Math.max(1, Math.trunc(n))));
   };
 
-  const grouped = code ? code.code.replace(/(.{3})(?=.)/g, "$1 ") : "";
+  const label = (a: TotpUri) => a.issuer || a.account || "Unnamed account";
 
   return (
     <div className="totp scroll">
+      <h3 className="section-title">
+        <KeyRound size={16} aria-hidden="true" /> SAVED ACCOUNTS
+      </h3>
+      {loadError && (
+        <div className="error-box" role="alert">
+          <div>
+            <strong>Cannot load saved accounts</strong>
+            <p>{loadError}</p>
+          </div>
+        </div>
+      )}
+      {accounts && accounts.length === 0 && (
+        <p className="totp-empty muted">No saved accounts yet. Add one below to keep its code here.</p>
+      )}
+      {saved.length > 0 && (
+        <ul className="totp-list">
+          {saved.map((a, i) => {
+            const result = codes[i];
+            return (
+              <li key={i} className="totp-account">
+                <div className="totp-name">
+                  <strong>{label(a)}</strong>
+                  {a.issuer && a.account && <span className="muted">{a.account}</span>}
+                </div>
+                {result?.error && <span className="totp-error">{result.error}</span>}
+                {result?.code && (
+                  <>
+                    <button className="totp-code" onClick={() => void copyCode(result.code)} title="Copy code">
+                      {groupCode(result.code.code)}
+                    </button>
+                    <Ring remaining={result.code.remainingSeconds} period={a.period} size={34} />
+                  </>
+                )}
+                <button
+                  className="icon-btn"
+                  onClick={() => setRemoving(i)}
+                  aria-label={`Remove ${label(a)}`}
+                  title="Remove account"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
       <h3 className="section-title">
         <QrCode size={16} aria-hidden="true" /> IMPORT FROM QR CODE
       </h3>
@@ -239,33 +370,36 @@ export default function TotpGenerator() {
         </div>
       </div>
 
-      {error && (
+      {preview?.error && (
         <div className="error-box" role="alert">
           <div>
             <strong>Error</strong>
-            <p>{error}</p>
+            <p>{preview.error}</p>
           </div>
         </div>
       )}
-      {code && (
-        <button className="code-card" onClick={() => void copyCode()} title="Copy code">
-          <span className="code">{grouped}</span>
-          <span className="ring" aria-label={`${code.remainingSeconds} seconds remaining`}>
-            <svg viewBox="0 0 48 48" width="52" height="52" aria-hidden="true">
-              <circle cx="24" cy="24" r={RING_RADIUS} className="ring-bg" />
-              <circle
-                cx="24"
-                cy="24"
-                r={RING_RADIUS}
-                className={`ring-fg${code.remainingSeconds <= 5 ? " low" : ""}`}
-                strokeDasharray={RING_LENGTH}
-                strokeDashoffset={RING_LENGTH * (1 - code.remainingSeconds / period)}
-                transform="rotate(-90 24 24)"
-              />
-            </svg>
-            <span className="ring-text">{code.remainingSeconds}</span>
-          </span>
-        </button>
+      {preview?.code && (
+        <>
+          <button className="code-card" onClick={() => void copyCode(preview.code)} title="Copy code">
+            <span className="code">{groupCode(preview.code.code)}</span>
+            <Ring remaining={preview.code.remainingSeconds} period={period} size={52} />
+          </button>
+          <div className="totp-save">
+            <button className="primary" disabled={!accounts} onClick={() => void saveAccount()}>
+              <Plus size={16} aria-hidden="true" /> Save Account
+            </button>
+          </div>
+        </>
+      )}
+
+      {removing !== null && saved[removing] && (
+        <ConfirmDialog
+          title="Remove Account"
+          message={`Remove "${label(saved[removing])}"? Its secret is deleted and cannot be recovered.`}
+          confirmLabel="Remove"
+          onConfirm={() => void removeAccount(removing)}
+          onCancel={() => setRemoving(null)}
+        />
       )}
     </div>
   );

@@ -44,6 +44,8 @@ declared defaults; unknown ids or wrong types are rejected (`InvalidOptions`).
 | `http_request` | `{ request: { method, url, headers: [[k,v]], body: string \| null } }` | `{ status, statusText, headers: [[k,v]], body, durationMs, sizeBytes }` |
 | `totp_generate` | `{ secret, algorithm: "SHA1"\|"SHA256"\|"SHA512", digits, period }` | `{ code, remainingSeconds }` |
 | `totp_parse_uri` | `{ uri }` | `{ account, issuer, secret, algorithm, digits, period }` |
+| `totp_load_accounts` / `totp_save_accounts` | — / `{ accounts }` | saved accounts (the `totp_parse_uri` shape) / `null`; stored DPAPI-encrypted in `totp-accounts.bin` |
+| `get_drafts` / `set_draft` | — / `{ key, value }` (`null` forgets it) | all drafts / `null`; unsaved panel input kept in memory by the tray process |
 | `decode_qr_image` | `{ imageBase64 }` (PNG/JPEG bytes) | decoded text |
 | `pick_screen_color` | — | `"#RRGGBB"` (also copied to clipboard by the UI) |
 | `read_text_file` / `write_text_file` | `{ path }` / `{ path, contents }` | file text / `null` |
@@ -52,13 +54,18 @@ declared defaults; unknown ids or wrong types are rejected (`InvalidOptions`).
 | `reset_window_state` | — | `null`; forgets the resized popover size and re-places an open popover |
 
 Events from the shell: `navigate` (`"settings"`) and `closing` (the window is destroyed
-120 ms later; the UI fades out and flushes settings).
+120 ms later; the UI fades out and flushes settings and drafts).
+
+Panel input (tool input and mode, HTTP request, SVG source, the TOTP form) is a draft: the
+UI sends it to the shell, which keeps it in memory only, so it comes back when the window
+reopens and is gone when the app quits.
 
 The popover opens next to the taskbar at its tray end (edge detected from the
 `Shell_TrayWnd`/`Shell_SecondaryTrayWnd` windows), 12 px from it, at the size it was last
 resized to (`popover-state.json`). While it is open, a 25 ms poll moves it aside when an
 auto-hidden taskbar slides out over it and back when the taskbar hides; the thread ends
-with the window. Headers marked `data-drag` move the window.
+with the window. The popover closes when it loses the focus; if Windows never gave it the
+focus, the same poll closes it once another window becomes active. Headers marked `data-drag` move the window.
 
 File dialogs use `@tauri-apps/plugin-dialog`; clipboard uses `navigator.clipboard`.
 Drag & drop uses HTML5 events (window `dragDropEnabled: false`).

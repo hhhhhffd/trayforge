@@ -58,6 +58,12 @@ export const api = {
   totpGenerate: (p: { secret: string; algorithm: TotpAlgorithm; digits: number; period: number }) =>
     call<TotpCode>("totp_generate", p),
   totpParseUri: (uri: string) => call<TotpUri>("totp_parse_uri", { uri }),
+  /** Saved accounts, encrypted on disk by the shell. */
+  totpLoadAccounts: () => call<TotpUri[]>("totp_load_accounts"),
+  totpSaveAccounts: (accounts: TotpUri[]) => call<null>("totp_save_accounts", { accounts }),
+  getDrafts: () => call<Record<string, unknown>>("get_drafts"),
+  /** `null` forgets the draft. */
+  setDraft: (key: string, value: unknown) => call<null>("set_draft", { key, value }),
   decodeQrImage: (imageBase64: string) => call<string>("decode_qr_image", { imageBase64 }),
   pickScreenColor: () => call<string>("pick_screen_color"),
   readTextFile: (path: string) => call<string>("read_text_file", { path }),

@@ -1584,6 +1584,58 @@ input[type="color"] {
   position: absolute;
   font-weight: 600;
 }
+.totp-empty {
+  margin: 0 0 4px;
+}
+.totp-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.totp-account {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 12px 10px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--sep);
+  background: var(--card);
+}
+.totp-name {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+.totp-name > * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.totp-code {
+  padding: 4px 8px;
+  border-radius: 8px;
+  font: 600 22px "Cascadia Mono", Consolas, monospace;
+  letter-spacing: 0.06em;
+}
+.totp-code:hover {
+  background: var(--hover);
+}
+.totp-account .ring-text {
+  font-size: 11px;
+}
+.totp-error {
+  color: var(--danger);
+  font-size: 12px;
+}
+.totp-save {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
 
 /* Tailwind colors */
 .tw {

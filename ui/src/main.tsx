@@ -2,6 +2,7 @@ import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
 import { api } from "./api";
+import { loadDrafts } from "./drafts";
 import { normalizeSettings, SettingsProvider } from "./settings";
 import { ToastProvider } from "./toast";
 import type { Settings, ToolInfo } from "./types";
@@ -21,7 +22,7 @@ function Root() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    Promise.all([api.listTools(), api.getSettings()])
+    Promise.all([api.listTools(), api.getSettings(), loadDrafts()])
       .then(([tools, raw]) => setLoaded({ tools, raw, settings: normalizeSettings(raw) }))
       .catch((e) => setError(String(e instanceof Error ? e.message : (e as { display?: string }).display ?? e)));
   }, []);

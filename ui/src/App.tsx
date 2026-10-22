@@ -7,6 +7,7 @@ import { Splitter } from "./components/Splitter";
 import { ToolPage } from "./components/ToolPage";
 import { SCREEN_COLOR_PICKER_ID } from "./lib";
 import { emitAction } from "./actions";
+import { flushDrafts } from "./drafts";
 import { useSettings } from "./settings";
 import { CATEGORIES, SIDEBAR_WIDTH, type Category, type ToolInfo } from "./types";
 
@@ -32,8 +33,9 @@ export function App({ tools }: { tools: ToolInfo[] }) {
   const [closing, setClosing] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<Category | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
-  // Input carried across tool switches when "Preserve Input on Tool Switch" is on.
-  const carriedInput = useRef("");
+  // Input carried across tool switches when "Preserve Input on Tool Switch" is on; null
+  // until a tool has been shown in this window, so the tool's own draft is used instead.
+  const carriedInput = useRef<string | null>(null);
 
   const openTool = useCallback(
     (id: string) => {
@@ -76,6 +78,7 @@ export function App({ tools }: { tools: ToolInfo[] }) {
     const unlisten = api.onClosing(() => {
       setClosing(true);
       void flush();
+      void flushDrafts();
     });
     return () => {
       unlisten.then((f) => f());
