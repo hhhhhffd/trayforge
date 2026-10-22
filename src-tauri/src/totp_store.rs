@@ -30,8 +30,7 @@ pub fn load(app: &AppHandle) -> Result<Vec<TotpParams>, String> {
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(Vec::new()),
         Err(e) => return Err(format!("Cannot read {}: {e}", path.display())),
     };
-    let json = unprotect(&sealed)
-        .map_err(|e| format!("Cannot decrypt {}: {e}", path.display()))?;
+    let json = unprotect(&sealed).map_err(|e| format!("Cannot decrypt {}: {e}", path.display()))?;
     serde_json::from_slice(&json).map_err(|e| format!("Cannot parse {}: {e}", path.display()))
 }
 
