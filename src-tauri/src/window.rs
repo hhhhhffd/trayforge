@@ -16,6 +16,8 @@ use tauri::{
     WebviewWindowBuilder, WindowEvent,
 };
 
+use windows::Win32::UI::WindowsAndMessaging::{GetAncestor, GetForegroundWindow, GA_ROOTOWNER};
+
 use crate::{
     settings::{self, Settings},
     taskbar::{self, Edge, Rect},
@@ -81,9 +83,7 @@ pub fn show(app: &AppHandle, route: Option<&'static str>) {
                     eprintln!("trayforge: cannot emit navigate: {e}");
                 }
             }
-            if let Err(e) = window.set_focus() {
-                eprintln!("trayforge: cannot focus window: {e}");
-            }
+            focus(&window);
         } else if let Err(e) = open(&app, None, route) {
             eprintln!("trayforge: cannot open window: {e}");
         }
@@ -189,29 +189,37 @@ fn open(
     };
 
     if let Some(route) = route {
-        // The UI reads this on mount; the event below only reaches an already running UI.
-        builder = builder
-            .initialization_script(format!(
-                "window.__TRAYFORGE_INITIAL_ROUTE__ = {};",
-                json!(route)
-            ))
-            .on_page_load(move |window, payload| {
-                if matches!(payload.event(), tauri::webview::PageLoadEvent::Finished) {
-                    let _ = window.emit("navigate", route);
-                }
-            });
+        // The UI reads this on mount; the event in `on_page_load` only reaches an already
+        // running UI.
+        builder = builder.initialization_script(format!(
+            "window.__TRAYFORGE_INITIAL_ROUTE__ = {};",
+            json!(route)
+        ));
     }
+    builder = builder.on_page_load(move |window, payload| {
+        if !matches!(payload.event(), tauri::webview::PageLoadEvent::Finished) {
+            return;
+        }
+        if let Some(route) = route {
+            if let Err(e) = window.emit("navigate", route) {
+                eprintln!("trayforge: cannot emit navigate: {e}");
+            }
+        }
+        // WebView2 takes a while to start, and focusing the window before the page exists
+        // can leave the keyboard focus outside it. Focus again once the UI is there.
+        focus(&window);
+    });
 
     let window = builder.build().map_err(|e| e.to_string())?;
+    let was_focused = Arc::new(AtomicBool::new(false));
 
     if standalone {
         restore_state(app, &window);
     } else {
         place_popover(app, &window, anchor, (width, height));
-        follow_taskbar(window.clone());
+        follow_taskbar(window.clone(), was_focused.clone());
     }
 
-    let was_focused = Arc::new(AtomicBool::new(false));
     let handle = app.clone();
     window.on_window_event(move |event| match event {
         WindowEvent::Focused(true) => was_focused.store(true, Ordering::Relaxed),
@@ -220,12 +228,7 @@ fn open(
                 && was_focused.load(Ordering::Relaxed)
                 && !handle.state::<PickerActive>().0.load(Ordering::Relaxed) =>
         {
-            if let Ok(mut last) = handle.state::<LastBlurClose>().0.lock() {
-                *last = Some(Instant::now());
-            }
-            if let Some(window) = handle.get_webview_window(LABEL) {
-                close(&window);
-            }
+            close_on_blur(&handle);
         }
         WindowEvent::CloseRequested { .. } if standalone => {
             if let Some(window) = handle.get_webview_window(LABEL) {
@@ -236,7 +239,37 @@ fn open(
     });
 
     window.show().map_err(|e| e.to_string())?;
-    window.set_focus().map_err(|e| e.to_string())
+    focus(&window);
+    Ok(())
+}
+
+/// Brings the window to the front and moves the keyboard focus into the page.
+fn focus(window: &WebviewWindow) {
+    if let Err(e) = window.set_focus() {
+        eprintln!("trayforge: cannot focus window: {e}");
+    }
+    if let Err(e) = AsRef::<tauri::Webview>::as_ref(window).set_focus() {
+        eprintln!("trayforge: cannot focus webview: {e}");
+    }
+}
+
+fn close_on_blur(app: &AppHandle) {
+    if let Ok(mut last) = app.state::<LastBlurClose>().0.lock() {
+        *last = Some(Instant::now());
+    }
+    if let Some(window) = app.get_webview_window(LABEL) {
+        close(&window);
+    }
+}
+
+/// The top-level window that owns the foreground window (dialogs resolve to their owner);
+/// `None` while Windows is switching windows.
+fn foreground_root() -> Option<isize> {
+    let foreground = unsafe { GetForegroundWindow() };
+    if foreground.is_invalid() {
+        return None;
+    }
+    Some(unsafe { GetAncestor(foreground, GA_ROOTOWNER) }.0 as isize)
 }
 
 /// Next to the taskbar at its tray end, like the system tray flyouts, on the monitor under
@@ -310,14 +343,32 @@ fn monitor_rect(monitor: &tauri::Monitor) -> Rect {
 /// taskbar hides again. It only reacts to the taskbar, so dragging or resizing the window
 /// is never fought. The thread ends with the window, keeping the idle tray process free
 /// of timers.
-fn follow_taskbar(window: WebviewWindow) {
+///
+/// It also closes a popover that Windows never let take the focus (so no blur event will
+/// come) as soon as the user activates some other window.
+fn follow_taskbar(window: WebviewWindow, was_focused: Arc<AtomicBool>) {
+    let own = window.hwnd().map(|hwnd| hwnd.0 as isize).ok();
+    // The window that was active when the popover opened: the taskbar after a tray click,
+    // the current app after the hotkey.
+    let opened_over = foreground_root();
     std::thread::spawn(move || {
         // How far the window currently stands off the place the user left it.
         let mut shift = 0;
         loop {
             std::thread::sleep(TASKBAR_POLL);
-            if window.app_handle().get_webview_window(LABEL).is_none() {
+            let app = window.app_handle();
+            if app.get_webview_window(LABEL).is_none() {
                 return;
+            }
+            if let (Some(own), Some(active)) = (own, foreground_root()) {
+                if !was_focused.load(Ordering::Relaxed)
+                    && active != own
+                    && Some(active) != opened_over
+                    && !app.state::<PickerActive>().0.load(Ordering::Relaxed)
+                {
+                    close_on_blur(app);
+                    return;
+                }
             }
             let (Ok(position), Ok(size), Ok(Some(monitor))) = (
                 window.outer_position(),
