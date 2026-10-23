@@ -43,7 +43,7 @@ Trayforge 1.0: first Microsoft Store release. Launch at login now uses Windows s
 ## Product features (one per line, up to 20)
 64 developer tools in 7 categories
 Opens from the tray or with a global hotkey (Ctrl+Alt+D)
-Everything runs offline on your PC, no data leaves your computer
+Every tool runs locally on your PC; only the HTTP Client goes online
 About 12 MB of memory while idle in the tray
 JSON, YAML, XML, CSV, TOML, SQL and GraphQL formatters and converters
 JWT decoder, Base64, URL and HTML encoders
@@ -68,9 +68,9 @@ Free and open source (MIT)
 6-settings.png: Launch at login, hotkey, appearance and more
 
 ## Search terms (up to 7)
-developer tools
-json formatter
-jwt decoder
+devtools
+JSON formatter
+JWT decoder
 base64
 hash generator
 uuid generator
@@ -87,4 +87,4 @@ regex tester
 - Age ratings questionnaire: no user interaction, no shared location, no purchases, no objectionable content
 
 ## Restricted capability justification (runFullTrust)
-Trayforge is a desktop (Win32) app built with Tauri. It needs runFullTrust to run as a regular desktop process: it shows a system tray icon, registers a global hotkey, creates a screen color picker overlay and uses WebView2 for its UI.
+Trayforge is a desktop (Win32) app built with Tauri and packaged as MSIX. It needs runFullTrust to run as a regular desktop process: it shows a system tray icon, registers a global hotkey (Ctrl+Alt+D) to open its window, creates a topmost screen overlay for its color picker, and renders its UI with Microsoft Edge WebView2. It does not install drivers or services and needs no administrator rights.
