@@ -5,6 +5,7 @@ mod commands;
 mod hotkey;
 mod picker;
 mod settings;
+mod startup;
 mod taskbar;
 mod totp_store;
 mod window;

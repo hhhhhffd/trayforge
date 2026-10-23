@@ -10,7 +10,6 @@ use base64::Engine;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 use tauri::{AppHandle, Manager};
-use tauri_plugin_autostart::ManagerExt;
 use trayforge_core::{
     totp::{self, Algorithm, TotpCode, TotpParams},
     ToolError, ToolInfo, ToolOutput,
@@ -19,7 +18,7 @@ use trayforge_core::{
 use crate::{
     hotkey, picker,
     settings::{self, Settings},
-    totp_store,
+    startup, totp_store,
     window::{self, PickerActive},
 };
 
@@ -309,11 +308,5 @@ pub fn reset_window_state(app: AppHandle) -> Result<(), String> {
 
 #[tauri::command]
 pub async fn set_launch_at_login(app: AppHandle, enabled: bool) -> Result<(), String> {
-    let launcher = app.autolaunch();
-    let result = if enabled {
-        launcher.enable()
-    } else {
-        launcher.disable()
-    };
-    result.map_err(|e| e.to_string())
+    startup::set_enabled(&app, enabled)
 }
