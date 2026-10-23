@@ -22,3 +22,22 @@ Development: `cargo tauri dev` starts the Vite server (port 1420) and disables
 UI contract added by the shell: "Settings" in the tray menu emits the `navigate` event with
 `"settings"`; when the window does not exist yet it is created with
 `window.__TRAYFORGE_INITIAL_ROUTE__ = "settings"` so the UI can read the route on mount.
+
+## Microsoft Store (MSIX)
+
+`packaging/msix/AppxManifest.xml` is a template; `scripts/build-msix.ps1` fills in the identity
+from Partner Center (Product management > Product identity) and packs a release exe with the
+Windows SDK's `makepri` and `makeappx`:
+
+```powershell
+cargo build --release -p trayforge
+.\scripts\build-msix.ps1 -Exe target\release\trayforge.exe -Version 1.0.0.0 `
+  -IdentityName <Package/Identity/Name> -Publisher "<Package/Identity/Publisher>" `
+  -PublisherDisplayName "<Package/Properties/PublisherDisplayName>"
+```
+
+The result, `target\msix\Trayforge_<version>_x64.msix`, is unsigned: the Store signs it after
+certification. Store versions have four parts, the first non-zero and the last `0`.
+The logos in `packaging/msix/Assets` are rendered from `assets/icon.svg` with `rsvg-convert`.
+Launch at login uses the manifest's `windows.startupTask` (`TrayforgeStartup`) in the package
+and the registry Run key otherwise.
