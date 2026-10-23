@@ -32,12 +32,13 @@ Windows SDK's `makepri` and `makeappx`:
 ```powershell
 cargo build --release -p trayforge
 .\scripts\build-msix.ps1 -Exe target\release\trayforge.exe -Version 1.0.0.0 `
-  -IdentityName <Package/Identity/Name> -Publisher "<Package/Identity/Publisher>" `
-  -PublisherDisplayName "<Package/Properties/PublisherDisplayName>"
+  -IdentityName Tovarish.Sanechka.Trayforge `
+  -Publisher "CN=B155AF6E-2F98-4D48-8C0B-9B0A90DEF642" `
+  -PublisherDisplayName Tovarish.Sanechka
 ```
 
 The result, `target\msix\Trayforge_<version>_x64.msix`, is unsigned: the Store signs it after
-certification. Store versions have four parts, the first non-zero and the last `0`.
+certification. Store listing text and screenshots are in `packaging/store`. Store versions have four parts, the first non-zero and the last `0`.
 The logos in `packaging/msix/Assets` are rendered from `assets/icon.svg` with `rsvg-convert`.
 Launch at login uses the manifest's `windows.startupTask` (`TrayforgeStartup`) in the package
 and the registry Run key otherwise.
