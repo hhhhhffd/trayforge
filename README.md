@@ -17,6 +17,8 @@
 [![Downloads](https://img.shields.io/github/downloads/hhhhhffd/trayforge/total)](https://github.com/hhhhhffd/trayforge/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
+[English](README.md) · [Русский](README.ru.md)
+
 [**Download**](https://github.com/hhhhhffd/trayforge/releases/latest) ·
 [**Website**](https://hhhhhffd.github.io/trayforge/) ·
 [**Architecture**](docs/ARCHITECTURE.md) ·
@@ -39,6 +41,7 @@ open. Idle, Trayforge is a single ~12 MB process with no window, no WebView and 
 
 ## Highlights
 
+- **Shipped.** v1.0.0 is published to the Microsoft Store as an MSIX package, with NSIS and MSI installers on GitHub Releases.
 - **64 tools** in 7 categories: encoders, hashes, formatters, converters, generators, a regex
   tester, an HTTP client, a TOTP generator, a screen color picker and more.
 - **Tiny when idle.** About 12 MB of RAM in the tray. The window is created on demand and
@@ -47,10 +50,11 @@ open. Idle, Trayforge is a single ~12 MB process with no window, no WebView and 
 - **Remembers what you were doing.** Close the window mid-task and reopen it: the same tool
   and the same input are back. This memory lives in RAM only and is gone when you quit.
 - **TOTP for 2FA testing.** Keep several accounts with live codes side by side. Import them
-  from a QR screenshot. Secrets are encrypted with Windows DPAPI.
+  from a QR screenshot. TOTP follows RFC 6238, and secrets are encrypted with Windows DPAPI.
 - **Tray popover or standalone window.** The popover opens next to the taskbar, remembers
   its size, can be dragged, and steps aside for an auto-hidden taskbar.
 - **Keyboard first.** Global hotkey, quick switcher, search and a shortcut for every action.
+- **Tested.** 188 tests cover the core, including limits against hostile input (nesting depth, match counts, size caps). CI runs rustfmt, clippy with `-D warnings` and `cargo test`.
 - **Private.** No telemetry, no accounts. Only the HTTP Client touches the network, and only
   with the requests you write.
 
@@ -67,6 +71,10 @@ open. Idle, Trayforge is a single ~12 MB process with no window, no WebView and 
 </table>
 
 ## Install
+
+### Microsoft Store
+
+Trayforge 1.0.0 is published to the Microsoft Store as an MSIX package. Search for "Trayforge" in the Store app.
 
 ### winget
 
@@ -102,7 +110,7 @@ Builds are not code-signed yet, so SmartScreen may show "Windows protected your 
 | **Shell** | Tauri 2: tray icon, global hotkey, single instance, on-demand window, IPC commands, HTTP client (`reqwest` + rustls). |
 | **UI** | React 18, TypeScript, Vite, lucide icons, rendered in WebView2. |
 | **Platform** | Win32 through `windows-rs`: taskbar geometry, foreground tracking, DPAPI encryption, screen color picker. |
-| **Delivery** | GitHub Actions CI, NSIS and WiX installers, GitHub Pages site, winget. |
+| **Delivery** | GitHub Actions CI, MSIX (Microsoft Store), NSIS and WiX installers, GitHub Pages site, winget. |
 
 ## Architecture
 
