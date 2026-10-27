@@ -74,7 +74,7 @@
 
 ### Microsoft Store
 
-Trayforge 1.0.0 опубликован в Microsoft Store как пакет MSIX. Найдите "Trayforge" в приложении Store.
+Trayforge 1.0.0 опубликован в Microsoft Store как пакет MSIX. [Установить из Microsoft Store](https://apps.microsoft.com/detail/9P8SSQ8SZ9N0).
 
 ### winget
 

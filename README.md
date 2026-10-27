@@ -74,7 +74,7 @@ open. Idle, Trayforge is a single ~12 MB process with no window, no WebView and 
 
 ### Microsoft Store
 
-Trayforge 1.0.0 is published to the Microsoft Store as an MSIX package. Search for "Trayforge" in the Store app.
+Trayforge 1.0.0 is published to the Microsoft Store as an MSIX package. [Get it from the Microsoft Store](https://apps.microsoft.com/detail/9P8SSQ8SZ9N0).
 
 ### winget
 
